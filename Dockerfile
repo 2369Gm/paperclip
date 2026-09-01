@@ -128,6 +128,7 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 COPY --chown=node:node --from=build /app /app
 
 ENV NODE_ENV=production \
+  NODE_OPTIONS="--max-old-space-size=450" \
   HOME=/paperclip \
   HOST=0.0.0.0 \
   PORT=3100 \
