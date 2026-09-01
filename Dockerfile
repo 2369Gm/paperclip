@@ -3,7 +3,7 @@ FROM node:24-trixie-slim AS base
 ARG USER_UID=1000
 ARG USER_GID=1000
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends ca-certificates gosu curl gh git wget ripgrep python3 tini \
+  && apt-get install -y --no-install-recommends ca-certificates gosu curl gh git wget ripgrep python3 tini build-essential make g++ \
   && rm -rf /var/lib/apt/lists/* \
   && corepack enable
 
@@ -14,6 +14,7 @@ RUN usermod -u $USER_UID --non-unique node \
 
 FROM base AS deps
 WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential make g++ python3 && rm -rf /var/lib/apt/lists/*
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc ./
 COPY cli/package.json cli/
 COPY server/package.json server/
@@ -49,7 +50,7 @@ COPY packages/plugins/plugin-workspace-diff/package.json packages/plugins/plugin
 COPY patches/ patches/
 COPY scripts/link-plugin-dev-sdk.mjs scripts/
 
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --no-frozen-lockfile
 
 FROM base AS build
 WORKDIR /app
@@ -88,7 +89,7 @@ RUN pnpm --filter @paperclipai/plugin-sdk build
 # same ARG again for the runtime fallback; an ARG goes out of scope at the
 # end of its stage. Empty for local `docker build`, which then writes no stamp.
 ARG PAPERCLIP_BUILD_COMMIT=""
-ENV NODE_OPTIONS=--max-old-space-size=4096
+ENV NODE_OPTIONS=--max-old-space-size=1024
 RUN pnpm --filter @paperclipai/server build
 RUN test -f server/dist/index.js || (echo "ERROR: server build output missing" && exit 1)
 RUN rm -rf packages/paperclip-runner/runner/target
