@@ -142,6 +142,8 @@ ENV NODE_ENV=production \
   PAPERCLIP_CONFIG=/paperclip/instances/default/config.json \
   PAPERCLIP_DEPLOYMENT_MODE=authenticated \
   PAPERCLIP_DEPLOYMENT_EXPOSURE=private \
+  PAPERCLIP_AUTH_BASE_URL_MODE=explicit \
+  PAPERCLIP_PUBLIC_URL=https://paperclip-4.onrender.com \
   OPENCODE_ALLOW_ALL_MODELS=true \
   GEMINI_SANDBOX=false
 
