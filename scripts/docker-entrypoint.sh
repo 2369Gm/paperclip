@@ -47,7 +47,7 @@ fi
 
 if [ "${PAPERCLIP_DEPLOYMENT_MODE:-}" = "authenticated" ] && [ -n "${PAPERCLIP_PUBLIC_URL:-}" ]; then
     echo "Generating first-admin bootstrap invite..."
-    gosu node node cli/dist/index.js auth bootstrap-ceo --config "${PAPERCLIP_CONFIG:-/paperclip/instances/default/config.json}" --base-url "$PAPERCLIP_PUBLIC_URL" || true
+    gosu node node cli/node_modules/tsx/dist/cli.mjs cli/src/index.ts auth bootstrap-ceo --config "${PAPERCLIP_CONFIG:-/paperclip/instances/default/config.json}" --base-url "$PAPERCLIP_PUBLIC_URL" || true
 fi
 
 exec gosu node "$@"
