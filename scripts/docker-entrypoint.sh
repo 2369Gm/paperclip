@@ -45,6 +45,12 @@ if [ -d "$home_dir" ] && [ -n "$(find "$home_dir" \( ! -user node -o ! -group no
     chown -R node:node "$home_dir"
 fi
 
+if [ ! -f "${PAPERCLIP_CONFIG:-/paperclip/instances/default/config.json}" ] && [ -n "${DATABASE_URL:-}" ]; then
+    echo "Creating bootstrap config from Render environment..."
+    gosu node mkdir -p "$(dirname "${PAPERCLIP_CONFIG:-/paperclip/instances/default/config.json}")"
+    gosu node node -e 'const fs=require("fs"); const p=process.env.PAPERCLIP_CONFIG||"/paperclip/instances/default/config.json"; const c={"$meta":{"version":1,"source":"configure"},"database":{"mode":"postgres","connectionString":process.env.DATABASE_URL},"logging":{"mode":"file","logDir":"~/.paperclip/instances/default/logs"},"server":{"deploymentMode":"authenticated","exposure":"public","host":"0.0.0.0","port":process.env.PORT||3100,"allowedHostnames":[new URL(process.env.PAPERCLIP_PUBLIC_URL).hostname],"serveUi":true},"auth":{"baseUrlMode":"explicit","publicBaseUrl":process.env.PAPERCLIP_PUBLIC_URL,"disableSignUp":false},"telemetry":{"enabled":true}}; fs.writeFileSync(p,JSON.stringify(c,null,2));'
+fi
+
 if [ "${PAPERCLIP_DEPLOYMENT_MODE:-}" = "authenticated" ] && [ -n "${PAPERCLIP_PUBLIC_URL:-}" ]; then
     echo "Generating first-admin bootstrap invite..."
     gosu node node cli/node_modules/tsx/dist/cli.mjs cli/src/index.ts auth bootstrap-ceo --config "${PAPERCLIP_CONFIG:-/paperclip/instances/default/config.json}" --base-url "$PAPERCLIP_PUBLIC_URL" || true
